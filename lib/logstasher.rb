@@ -59,6 +59,8 @@ module LogStasher
     self.source = app.config.logstasher.source unless app.config.logstasher.source.nil?
     self.enabled = true
     self.log_controller_parameters = !! app.config.logstasher.log_controller_parameters
+    self.ignore_actions(app.config.logstasher.ignore_actions)
+    self.ignore(app.config.logstasher.ignore_custom)
   end
 
   def suppress_app_logs(app)
@@ -94,6 +96,29 @@ module LogStasher
         self.log(:#{severity}, msg)
       end
     EOM
+  end
+
+  def self.ignore_actions(actions)
+    ignore(lambda do |event|
+      params = event.payload[:params]
+      Array(actions).include?("#{params['controller']}##{params['action']}")
+    end)
+  end
+
+  def self.ignore_tests
+    @@ignore_tests ||= []
+  end
+
+  def self.ignore(test)
+    ignore_tests.push(test) if test
+  end
+
+  def self.ignore_nothing
+    @@ignore_tests = []
+  end
+
+  def self.ignore?(event)
+    ignore_tests.any?{|ignore_test| ignore_test.call(event)}
   end
 
   private

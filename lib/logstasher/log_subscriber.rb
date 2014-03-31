@@ -4,6 +4,7 @@ require 'active_support/log_subscriber'
 module LogStasher
   class RequestLogSubscriber < ActiveSupport::LogSubscriber
     def process_action(event)
+      return if LogStasher.ignore?(event)
       payload = event.payload
 
       data      = extract_request(payload)

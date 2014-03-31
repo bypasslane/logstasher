@@ -94,6 +94,23 @@ Since some fields are very specific to your application for e.g. *user_name*, so
       end
     end
 
+## Ignore Actions
+This was taken from Lograge.  It add the ability to ignore certain actions.
+To further clean up your logging, you can also tell Logstasher to skip log messages 
+meeting given criteria.  You can skip log messages generated from certain controller
+actions, or you can write a custom handler to skip messages based on data in the log event:
+
+```
+# config/environments/production.rb
+MyApp::Application.configure do
+  config.lograge.enabled = true
+
+  config.lograge.ignore_actions = ['home#index', 'aController#anAction']
+  config.lograge.ignore_custom = lambda do |event|
+    # return true here if you want to ignore based on the event
+  end
+end
+```
 ## Quick Setup for Logstash
 
 * Download logstash from [logstash.net](http://www.logstash.net/)
